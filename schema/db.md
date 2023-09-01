@@ -29,9 +29,9 @@
 | start_time             | DATATIME     | -      | false    | start time                               |
 | end_time               | DATATIME     | -      | false    | end time                                 |
 | referrer_reward_type   | VARCHAR      | 20     | false    | referrer reward type, [ENUM:COIN,COUPON] |
-| referrer_reward_amount | DECIMAL(6,2) | -      | false    | referrer reward amount                   |
+| referrer_reward_amount | DECIMAL(10,2) | -      | false    | referrer reward amount                   |
 | referee_reward_type    | VARCHAR      | 20     | false    | referee reward type, [ENUM:COIN,COUPON]  |
-| referee_reward_amount  | DECIMAL(6,2) | -      | false    | referee reward amount                    |
+| referee_reward_amount  | DECIMAL(10,2) | -      | false    | referee reward amount                    |
 
 ## referral_event_copywriting:
 | column            | Type     | length | nullable | Description                                                                                   |
@@ -83,6 +83,6 @@
 | referee_id    | BIGINT       | -      | false    | relative to referee                        |
 | referral_type | VARCHAR      | 10     | false    | reward to, [ENUM:REFERRER,REFEREE]         |
 | reward_type   | VARCHAR      |        | false    | reward type, [ENUM:COIN,COUPON]            |
-| reward_amount | DECIMAL(6,2) |        | false    | reward amount                              |
+| reward_amount | DECIMAL(10,2) |        | false    | reward amount                              |
 | reward_time   | DATATIME     | -      | false    | reward execution time                      |
 | reward_status | VARCHAR      | 10     | false    | reward status, [ENUM:PENDING,SUCCESS,FAIL] |
