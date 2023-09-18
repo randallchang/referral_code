@@ -1,7 +1,7 @@
 #
 ## Get referral code for current user
 
-**Base-URL:** [reference](https://jkopay.atlassian.net/wiki/spaces/RD4/pages/29393109/jkopay-app-svc+base-url)
+**Base-URL:** [reference](https://jkopay.atlassian.net/wiki/spaces/RD4/pages/53215233/jkopay-referral-svc+Base-URL+reference)
 
 **Mobile-URL:** `https://{{Base-URL}}/v1/my/referralDetail`
 
@@ -59,7 +59,6 @@ curl -X GET \
 | &emsp;&emsp;&emsp;└─styledTexts | array  | true     | styledTexts               |
 | &emsp;&emsp;&emsp;&emsp;└─text  | string | true     | text                      |
 | &emsp;&emsp;&emsp;&emsp;└─color | string | true     | color                     |
-| &emsp;&emsp;&emsp;&emsp;└─size  | int    | true     | size                      |
 | &emsp;&emsp;&emsp;&emsp;└─style | string | true     | style                     |
 | &emsp;&emsp;&emsp;&emsp;└─link  | string | true     | link                      |
 | └─footerText                    | string | true     | footerText                |
@@ -90,8 +89,7 @@ curl -X GET \
                         "styledTexts": [
                             {
                                 "text": "分享註冊碼給尚未註冊街口的朋友",
-                                "color": "#000000",
-                                "size": 12
+                                "color": "#000000"
                             }
                         ]
                     }
@@ -102,18 +100,15 @@ curl -X GET \
                         "styledTexts": [
                             {
                                 "text": "朋友於註冊流程中輸入推薦碼，註冊成功後朋友可獲得街口幣",
-                                "color": "#000000",
-                                "size": 12
+                                "color": "#000000"
                             },
                             {
                                 "text": "300",
-                                "color": "#e51400",
-                                "size": 12
+                                "color": "#e51400"
                             },
                             {
                                 "text": "元",
-                                "color": "#000000",
-                                "size": 12
+                                "color": "#000000"
                             }
                         ]
                     }
@@ -124,18 +119,15 @@ curl -X GET \
                         "styledTexts": [
                             {
                                 "text": "每成功推薦 1 位朋友，你也可以獲得街口幣",
-                                "color": "#000000",
-                                "size": 12
+                                "color": "#000000"
                             },
                             {
                                 "text": "200",
-                                "color": "#e51400",
-                                "size": 12
+                                "color": "#e51400"
                             },
                             {
                                 "text": "元！邀請人數無上限",
-                                "color": "#000000",
-                                "size": 12
+                                "color": "#000000"
                             }
                         ]
                     }

@@ -1,7 +1,7 @@
 #
 ## Check if referral code is valid
 
-**Base-URL:** [reference](https://jkopay.atlassian.net/wiki/spaces/RD4/pages/29393109/jkopay-app-svc+base-url)
+**Base-URL:** [reference](https://jkopay.atlassian.net/wiki/spaces/RD4/pages/53215233/jkopay-referral-svc+Base-URL+reference)
 
 **Mobile-URL:** `https://{{Base-URL}}/v1/referralCode/check`
 

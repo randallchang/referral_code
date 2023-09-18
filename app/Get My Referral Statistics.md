@@ -1,7 +1,7 @@
 #
 ## Get referral statistics
 
-**Base-URL:** [reference](https://jkopay.atlassian.net/wiki/spaces/RD4/pages/29393109/jkopay-app-svc+base-url)
+**Base-URL:** [reference](https://jkopay.atlassian.net/wiki/spaces/RD4/pages/53215233/jkopay-referral-svc+Base-URL+reference)
 
 **Mobile-URL:** `https://{{Base-URL}}/v1/my/referrer/statistics`
 
@@ -49,7 +49,7 @@ curl -X GET \
 | &emsp;└─image        | string | true     | image (phase 2)                     |
 | &emsp;└─phone        | string | true     | phone                               |
 | &emsp;└─status       | string | true     | [Enum:INELIGIBLE, ELIGIBLE]         |
-| └─reminder           | string | true     | derection for ineligible members    |
+| └─reminder           | string | true     | reminder for ineligible members     |
 
 **Response-example:**
 ```

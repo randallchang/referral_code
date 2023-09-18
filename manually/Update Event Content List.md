@@ -1,9 +1,9 @@
 #
 ## Update event content by id
 
-**Base-URL:** [reference](https://jkopay.atlassian.net/wiki/spaces/RD4/pages/29393109/jkopay-app-svc+base-url)
+**Base-URL:** [reference](https://jkopay.atlassian.net/wiki/spaces/RD4/pages/53215233/jkopay-referral-svc+Base-URL+reference)
 
-**Backend-URL:** `https://{{Base-URL}}/v1/referrerEvent/{id}/contents`
+**Backend-URL:** `https://{{Base-URL}}/v1/referralEvent/{id}/contents`
 
 **Type:** `PUT`
 
@@ -41,7 +41,7 @@
 curl -X PUT \
     -H 'Content-Type: application/json' \
     -H 'x-operator: jko_bot' \
-    -i https://{{Base-URL}}/v1/referrerEvent/1/contents --data '
+    -i https://{{Base-URL}}/v1/referralEvent/1/contents --data '
     [
         {
             "startTime": "2024-01-01T00:00:00+08:00",

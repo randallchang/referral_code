@@ -1,13 +1,13 @@
 #
-## Get referral subtitle
+## Get event list
 
-**Base-URL:** [reference](https://jkopay.atlassian.net/wiki/spaces/RD4/pages/29393109/jkopay-app-svc+base-url)
+**Base-URL:** [reference](https://jkopay.atlassian.net/wiki/spaces/RD4/pages/53215233/jkopay-referral-svc+Base-URL+reference)
 
-**Backend-URL:** `https://{{Base-URL}}/v1/my/referralEvent/subtitle`
+**Backend-URL:** `https://{{Base-URL}}/v1/referralEvents`
 
 **Type:** `GET`
 
-**Description:** Get referral subtitle by event type.
+**Description:** Get event list.
 
 **Design review:** [Design Review](https://jkopay.atlassian.net/wiki/spaces/RD4/pages/33424007/referral+code+Design+Review)
 
@@ -23,7 +23,7 @@
 ```
 curl -X GET \
     -H 'x-operator: jko_bot' \
-    -i https://{{baseUrl}}/v1/my/referralEvent/subtitle
+    -i https://{{baseUrl}}/v1/referralEvents
 ```
 
 **Response-fields:**
@@ -37,7 +37,6 @@ curl -X GET \
 | &emsp;└──id       | int    | true     | referal event id          |
 | &emsp;└──type     | string | true     | [Enum:PERSONAL, CAMPAIGN] |
 | &emsp;└──name     | string | true     | referal event name        |
-| &emsp;└──subtitle | string | true     | subtitle                  |
 
 note: [Enum description](https://enum_place)
 
@@ -51,8 +50,7 @@ note: [Enum description](https://enum_place)
             {
                 "id": 1,
                 "type": "PERSONAL",
-                "name": "好友邀請碼",
-                "subtitle": "邀請朋友加入獲得 $200 街口幣"
+                "name": "好友邀請碼"
             }
         ]
     }
