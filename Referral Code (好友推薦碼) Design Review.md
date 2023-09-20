@@ -25,18 +25,18 @@ MySQL->>referral-svc : return
 referral-svc->>APP : return result
 APP->>account-module: KYC validation request
 account-module->>Kafka : send kafka message for new member (topic: rd4_referral_member)
-Kafka->>referral-svc : consume message (topic: rd4_referral_member)
-referral-svc->>MySQL : create member data
-MySQL->>referral-svc : return
+Kafka--)referral-svc : consume message (topic: rd4_referral_member)
+referral-svc--)MySQL : create member data
+MySQL--)referral-svc : return
 account-module->>Kafka : send kafka message for member device binding (topic: rd4_referral_member)
-Kafka->>referral-svc : consume message (topic: rd4_referral_member)
-referral-svc->>MySQL : update referee device_bind_time
-MySQL->>referral-svc : return
-Note over account-module: when member pass KYC
+Kafka--)referral-svc : consume message (topic: rd4_referral_member)
+referral-svc--)MySQL : update referee device_bind_time
+MySQL--)referral-svc : return
+Note over account-module: when members pass KYC
 account-module->>Kafka : send kafka message for member passing KYC (topic: rd4_referral_member)
-Kafka->>referral-svc : consume message (topic: rd4_referral_member)
-referral-svc->>MySQL : update referee kyc_pass_time
-MySQL->>referral-svc : return
+Kafka--)referral-svc : consume message (topic: rd4_referral_member)
+referral-svc--)MySQL : update referee kyc_pass_time
+MySQL--)referral-svc : return
 
 ```
 
@@ -50,18 +50,18 @@ MySQL->>referral-svc : return
 referral-svc->>APP : return result
 APP->>account-module: device binding request
 account-module->>Kafka : send kafka message for new member (topic: rd4_referral_member)
-Kafka->>referral-svc : consume message (topic: rd4_referral_member)
-referral-svc->>MySQL : create member data
-MySQL->>referral-svc : return
+Kafka--)referral-svc : consume message (topic: rd4_referral_member)
+referral-svc--)MySQL : create member data
+MySQL--)referral-svc : return
 account-module->>Kafka : send kafka message for member passing KYC (topic: rd4_referral_member)
-Kafka->>referral-svc : consume message (topic: rd4_referral_member)
-referral-svc->>MySQL : update referee kyc_pass_time
-MySQL->>referral-svc : return
-Note over account-module: when member finishes device binding
+Kafka--)referral-svc : consume message (topic: rd4_referral_member)
+referral-svc--)MySQL : update referee kyc_pass_time
+MySQL--)referral-svc : return
+Note over account-module: when members finish device binding
 account-module->>Kafka : send kafka message for member device binding (topic: rd4_referral_member)
-Kafka->>referral-svc : consume message (topic: rd4_referral_member)
-referral-svc->>MySQL : update referee device_bind_time
-MySQL->>referral-svc : return
+Kafka--)referral-svc : consume message (topic: rd4_referral_member)
+referral-svc--)MySQL : update referee device_bind_time
+MySQL--)referral-svc : return
 
 ```
 
@@ -172,6 +172,7 @@ erDiagram
     }
     member {
         VARCHAR jkos_id
+        VARCHAR jkos_account_id
         DATATIME create_time
         DATATIME update_time
         BIGINT referral_code_id
@@ -184,7 +185,7 @@ erDiagram
         DATATIME create_time
         DATATIME update_time
         BIGINT referral_code_id
-        BIGINT referee_jkos_id
+        BIGINT member_jkos_id
         VARCHAR referral_type
         VARCHAR reward_type
         DECIMAL reward_amount
@@ -285,6 +286,7 @@ Referee, relative to `referral_code` with `referrer_code_id`,  save `jkos_Id` to
 | update_time      | DATATIME | -      | true     | update time                          |
 | referral_code_id | BIGINT   | -      | false    | relative to referral_code            |
 | jkos_id          | VARCHAR  | 36     | false    | referee's jkos_id                    |
+| jkos_account_id  | VARCHAR  | 36     | false    | referee's jkos_account_id            |
 | phone_number     | VARCHAR  | 10     | false    | referee's phone number               |
 | kyc_pass_time    | DATATIME | -      | false    | referee passes kyc time              |
 | device_bind_time | DATATIME | -      | false    | referee finishes device binding time |
@@ -298,7 +300,7 @@ Referral relationship for referrer and referee, relative to `referrer` with `ref
 | create_time      | DATATIME      | -      | false    | create time                                |
 | update_time      | DATATIME      | -      | true     | update time                                |
 | referral_code_id | BIGINT        | -      | false    | relative to referral_code                  |
-| referee_jkos_id  | BIGINT        | -      | false    | relative to member                         |
+| member_jkos_id   | BIGINT        | -      | false    | relative to member                         |
 | referral_type    | VARCHAR       | 10     | false    | reward to, [ENUM:REFERRER,REFEREE]         |
 | reward_type      | VARCHAR       | 10     | false    | reward type, [ENUM:COIN,COUPON]            |
 | reward_amount    | DECIMAL(10,2) | -      | false    | reward amount                              |
@@ -447,24 +449,25 @@ WHERE
 
 | Team | service        | Task                                    | Assignee | Estimated time | Start Date |
 |------|----------------|-----------------------------------------|----------|----------------|------------|
-| RD2  | account-module | register with referral code             |          |                |            |
-| RD2  | account-module | send kafka when registeration           |          |                |            |
+| RD2  | account-module | kyc validation with referral code       |          |                |            |
+| RD2  | account-module | device binding with referral code       |          |                |            |
+| RD2  | account-module | send kafka when using referral code     |          |                |            |
 | RD2  | account-module | send kafka when passes kyc validation   |          |                |            |
 | RD2  | account-module | send kafka when finishes device binding |          |                |            |
 | RD2  | upi            | request subtitle in /myTop              |          |                |            |
-| RD4  | referral-svc   | DB component                            |          |                |            |
-| RD4  | referral-svc   | implement REST clients                  |          |                |            |
-| RD4  | referral-svc   | consumers for Kafka                     |          |                |            |
-| RD4  | referral-svc   | service component for business logic    |          |                |            |
-| RD4  | referral-svc   | implement WEB API                       |          |                |            |
-| RD4  | referral-svc   | implement APP API                       |          |                |            |
-| WEB  | superadmin     | get referral overview                   |          |                |            |
-| WEB  | superadmin     | get referral statistics                 |          |                |            |
-| APP  | -              | kyc validation page                     |          |                |            |
-| APP  | -              | device binding page                     |          |                |            |
-| APP  | -              | check referral code                     |          |                |            |
-| APP  | -              | get referral event detail               |          |                |            |
-| APP  | -              | get referral statistics                 |          |                |            |
+| RD4  | referral-svc   | DB component                            | Randall  | 8h             |            |
+| RD4  | referral-svc   | implement REST clients                  | Randall  | 8h             |            |
+| RD4  | referral-svc   | consumers for Kafka                     | Randall  | 8h             |            |
+| RD4  | referral-svc   | service component for business logic    | Randall  | 8h             |            |
+| RD4  | referral-svc   | implement WEB API                       | Randall  | 8h             |            |
+| RD4  | referral-svc   | implement APP API                       | Randall  | 8h             |            |
+| WEB  | superadmin     | get referral overview                   | Jill     |                |            |
+| WEB  | superadmin     | get referral statistics                 | Jill     |                |            |
+| APP  | -              | kyc validation page                     | Water    |                |            |
+| APP  | -              | device binding page                     | Water    |                |            |
+| APP  | -              | check referral code                     | Water    |                |            |
+| APP  | -              | get referral event detail               | Water    |                |            |
+| APP  | -              | get referral statistics                 | Water    |                |            |
 
 ## 4.2 Dependencies
 

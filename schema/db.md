@@ -193,7 +193,7 @@ Referral relationship for referrer and referee, relative to `referrer` with `ref
 | create_time      | DATATIME      | -      | false    | create time                                |
 | update_time      | DATATIME      | -      | true     | update time                                |
 | referral_code_id | BIGINT        | -      | false    | relative to referral_code                  |
-| referee_jkos_id  | BIGINT        | -      | false    | relative to member                         |
+| member_jkos_id   | BIGINT        | -      | false    | relative to member                         |
 | referral_type    | VARCHAR       | 10     | false    | reward to, [ENUM:REFERRER,REFEREE]         |
 | reward_type      | VARCHAR       | 10     | false    | reward type, [ENUM:COIN,COUPON]            |
 | reward_amount    | DECIMAL(10,2) | -      | false    | reward amount                              |

@@ -15,13 +15,14 @@
 
 **Message-parameters:**
 
-| Parameter      | Type   | Max Length | Required | Description                                                                                 |
-|----------------|--------|------------|----------|---------------------------------------------------------------------------------------------|
-| type           | string | -          | true     | [ENUM: REFERRAL, KYC_PASS, DEVICE_BIND]                                                     |
-| jkosId         | string | -          | true     | jkosId                                                                                      |
-| phoneNumber    | string | -          | false    | phone number                                                                                |
-| referralCode   | string | -          | false    | referral code                                                                               |
-| eventTime      | string | -          | false    | KYC passed time or device binding time(ISO-8601 time format, ex: 2023-08-30T00:00:00+08:00) |
+| Parameter     | Type   | Max Length | Required | Description                                                                                 |
+|---------------|--------|------------|----------|---------------------------------------------------------------------------------------------|
+| type          | string | -          | true     | [ENUM: REFERRAL, KYC_PASS, DEVICE_BIND]                                                     |
+| jkosId        | string | -          | true     | jkosId                                                                                      |
+| jkosAccountId | string | -          | true     | jkosAccountId                                                                               |
+| phoneNumber   | string | -          | false    | phone number                                                                                |
+| referralCode  | string | -          | false    | referral code                                                                               |
+| eventTime     | string | -          | false    | KYC passed time or device binding time(ISO-8601 time format, ex: 2023-08-30T00:00:00+08:00) |
 
 **Message-example:**
 ```
@@ -29,6 +30,7 @@
     "type": "REFERRAL",
     "content": {
         "jkosId": "d3b82672-eb20-11ec-b230-00505684fd45",
+        "jkosAccountId": "9001234",
         "phoneNumber": "0912345678",
         "referralCode": "JKOOLAOLA"
     }
