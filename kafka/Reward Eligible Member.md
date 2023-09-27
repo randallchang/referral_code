@@ -13,20 +13,28 @@
 
 **Message-content-type:** `JSON`
 
+**Backend-Request-headers:**
+
+| Header         | Type   | Required | Description           |
+|----------------|--------|----------|-----------------------|
+| type           | string | true     | [ENUM: REWARD_MEMBER] |
+| version        | string | true     | start from v1.0       |
+| correlation-id | string | true     | correlation id        |
+
 **Message-parameters:**
 
-| Parameter | Type   | Max Length | Required | Description                              |
-|-----------|--------|------------|----------|------------------------------------------|
-| type      | string | -          | true     | [ENUM: REWARD_MEMBER] |
-| jkosId    | string | -          | true     | jkosId                                   |
+| Parameter | Type   | Max Length | Required | Description |
+|-----------|--------|------------|----------|-------------|
+| jkosId    | string | -          | true     | jkosId      |
 
 **Message-example:**
 ```
+type: REWARD_ELIGIBLE_MEMBER
+version: v1.0
+correlation-id: 5a0c10ee-3d48-45cc-9627-a99ec32cca14
+
 {
-    "type": "REWARD_ELIGIBLE_MEMBER",
-    "content": {
-        "jkosId": "d3b82672-eb20-11ec-b230-00505684fd45"
-    }
+    "jkosId": "d3b82672-eb20-11ec-b230-00505684fd45"
 }
 ```
 

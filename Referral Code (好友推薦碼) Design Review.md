@@ -15,7 +15,23 @@
 
 ## 2.1 Information Flow
 
-### 2.1.1 KYC Validation (for common user)
+### 2.1.1 Sync New Member
+
+init: DBA helps to dump data from account module db as initail data
+
+runtime:
+
+```mermaid
+sequenceDiagram
+
+account-module->>Kafka : send kafka message for new member (topic: rd2_member_info)
+Kafka--)jkopay-ms-svc : consume message (topic: rd2_member_info)
+referral-svc--)MySQL : create member data
+MySQL--)jkopay-ms-svc : return
+
+```
+
+### 2.1.2 KYC Validation (for common user)
 ```mermaid
 sequenceDiagram
 
@@ -24,23 +40,23 @@ referral-svc->>MySQL : check if referral code exists
 MySQL->>referral-svc : return
 referral-svc->>APP : return result
 APP->>account-module: KYC validation request
-account-module->>Kafka : send kafka message for new member (topic: rd4_referral_member)
-Kafka--)referral-svc : consume message (topic: rd4_referral_member)
-referral-svc--)MySQL : create member data
+account-module->>Kafka : send kafka message for new member using referral code (topic: rd2_registration_member)
+Kafka--)referral-svc : consume message (topic: rd2_registration_member)
+referral-svc--)MySQL : map member and referral code
 MySQL--)referral-svc : return
-account-module->>Kafka : send kafka message for member device binding (topic: rd4_referral_member)
-Kafka--)referral-svc : consume message (topic: rd4_referral_member)
+account-module->>Kafka : send kafka message for member device binding (topic: rd2_registration_member)
+Kafka--)referral-svc : consume message (topic: rd2_registration_member)
 referral-svc--)MySQL : update referee device_bind_time
 MySQL--)referral-svc : return
 Note over account-module: when members pass KYC
-account-module->>Kafka : send kafka message for member passing KYC (topic: rd4_referral_member)
-Kafka--)referral-svc : consume message (topic: rd4_referral_member)
+account-module->>Kafka : send kafka message for member passing KYC (topic: rd2_registration_member)
+Kafka--)referral-svc : consume message (topic: rd2_registration_member)
 referral-svc--)MySQL : update referee kyc_pass_time
 MySQL--)referral-svc : return
 
 ```
 
-### 2.1.2 Device Vinding (for SHOPEE user)
+### 2.1.3 Device Vinding (for SHOPEE user)
 ```mermaid
 sequenceDiagram
 
@@ -49,23 +65,23 @@ referral-svc->>MySQL : check if referral code exists
 MySQL->>referral-svc : return
 referral-svc->>APP : return result
 APP->>account-module: device binding request
-account-module->>Kafka : send kafka message for new member (topic: rd4_referral_member)
-Kafka--)referral-svc : consume message (topic: rd4_referral_member)
-referral-svc--)MySQL : create member data
+account-module->>Kafka : send kafka message for new member using referral code (topic: rd2_registration_member)
+Kafka--)referral-svc : consume message (topic: rd2_registration_member)
+referral-svc--)MySQL : map member and referral code
 MySQL--)referral-svc : return
-account-module->>Kafka : send kafka message for member passing KYC (topic: rd4_referral_member)
-Kafka--)referral-svc : consume message (topic: rd4_referral_member)
+account-module->>Kafka : send kafka message for member passing KYC (topic: rd2_registration_member)
+Kafka--)referral-svc : consume message (topic: rd2_registration_member)
 referral-svc--)MySQL : update referee kyc_pass_time
 MySQL--)referral-svc : return
 Note over account-module: when members finish device binding
-account-module->>Kafka : send kafka message for member device binding (topic: rd4_referral_member)
-Kafka--)referral-svc : consume message (topic: rd4_referral_member)
+account-module->>Kafka : send kafka message for member device binding (topic: rd2_registration_member)
+Kafka--)referral-svc : consume message (topic: rd2_registration_member)
 referral-svc--)MySQL : update referee device_bind_time
 MySQL--)referral-svc : return
 
 ```
 
-### 2.1.3 Reward Eligible Members
+### 2.1.4 Reward Eligible Members
 ```mermaid
 sequenceDiagram
 
@@ -170,11 +186,12 @@ erDiagram
         VARCHAR in_app_content
         VARCHAR boxed_message
     }
-    member {
-        VARCHAR jkos_id
-        VARCHAR jkos_account_id
-        DATATIME create_time
-        DATATIME update_time
+    member_profile {
+        VARCHAR member_jkos_id
+        DATATIME created_at
+        DATATIME updated_at
+        VARCHAR account_id
+        VARCHAR jkos_account
         BIGINT referral_code_id
         VARCHAR phone_number
         DATATIME kyc_pass_time
@@ -197,8 +214,8 @@ erDiagram
     referral_event ||--|{ referral_event_content : contains
     referral_event ||--|{ referral_event_copywriting : contains
     referral_event ||--|{ referral_event_notification : contains
-    referral_code ||--|{ member : invite
-    member ||--|{ referral_reward : has
+    referral_code ||--|{ member_profile : invite
+    member_profile ||--|{ referral_reward : has
     referral_code ||--|{ referral_reward : has
 
 ```
@@ -276,36 +293,36 @@ Notification message,  relative to `referral_event` with `referral_event_id`, gi
 | in_app_content    | VARCHAR  | 2048   | false    | in app content                       |
 | boxed_message     | VARCHAR  | 2048   | false    | boxed message                        |
 
-### 3.2.2.6 member:
-Referee, relative to `referral_code` with `referrer_code_id`,  save `jkos_Id` to define user reference in account modules, use `phone_number` to save phone number user used when registration, save user passing KYC and device binding timings seperately in `kyc_pass_time` and `device_bind_time`.
+### 3.2.2.6 member_profile:
+Referee and member detail, relative to `referral_code` with `referrer_code_id`,  save `jkos_Id` to define user reference in account modules, use `phone_number` to save phone number user used when registration, save user passing KYC and device binding timings seperately in `kyc_pass_time` and `device_bind_time`.
 
-| column           | Type     | length | nullable | Description                          |
-|------------------|----------|--------|----------|--------------------------------------|
-| id               | BIGINT   | -      | false    | PK id                                |
-| create_time      | DATATIME | -      | false    | create time                          |
-| update_time      | DATATIME | -      | true     | update time                          |
-| referral_code_id | BIGINT   | -      | false    | relative to referral_code            |
-| jkos_id          | VARCHAR  | 36     | false    | referee's jkos_id                    |
-| jkos_account_id  | VARCHAR  | 36     | false    | referee's jkos_account_id            |
-| phone_number     | VARCHAR  | 10     | false    | referee's phone number               |
-| kyc_pass_time    | DATATIME | -      | false    | referee passes kyc time              |
-| device_bind_time | DATATIME | -      | false    | referee finishes device binding time |
+| column           | Type     | length | nullable | Description                                       |
+|------------------|----------|--------|----------|---------------------------------------------------|
+| account_id       | VARCHAR  | 20     | false    | referee's account_id PK                           |
+| created_at       | DATATIME | -      | false    | create time                                       |
+| updated_at       | DATATIME | -      | false    | update time                                       |
+| member_jkos_id   | VARCHAR  | 36     | false    | member's jkosId,                                  |
+| jkos_account     | VARCHAR  | 9      | false    | referee's jkos_account                            |
+| referral_code_id | BIGINT   | -      | false    | referee's relative to referral_code  (new cloumn) |
+| phone_number     | VARCHAR  | 10     | false    | referee's phone number               (new cloumn) |
+| kyc_pass_time    | DATATIME | -      | false    | referee passes kyc time              (new cloumn) |
+| device_bind_time | DATATIME | -      | false    | referee finishes device binding time (new cloumn) |
 
 ### 3.2.2.7 referral_reward:
 Referral relationship for referrer and referee, relative to `referrer` with `referrer_id`, relative to `referee` with `referee_id`, reward target can be referrer or referee so give it `referral_type` to seperate them, reward can be JKO coin or JKO coupon so give it `reward_type` and `reward_amount` to seperate them, record reward timing with `reward_time` and record result with `reward_status` for retrying.
 
-| column           | Type          | length | nullable | Description                                |
-|------------------|---------------|--------|----------|--------------------------------------------|
-| id               | BIGINT        | -      | false    | PK id                                      |
-| create_time      | DATATIME      | -      | false    | create time                                |
-| update_time      | DATATIME      | -      | true     | update time                                |
-| referral_code_id | BIGINT        | -      | false    | relative to referral_code                  |
-| member_jkos_id   | BIGINT        | -      | false    | relative to member                         |
-| referral_type    | VARCHAR       | 10     | false    | reward to, [ENUM:REFERRER,REFEREE]         |
-| reward_type      | VARCHAR       | 10     | false    | reward type, [ENUM:COIN,COUPON]            |
-| reward_amount    | DECIMAL(10,2) | -      | false    | reward amount                              |
-| reward_time      | DATATIME      | -      | false    | reward execution time                      |
-| reward_status    | VARCHAR       | 10     | false    | reward status, [ENUM:PENDING,SUCCESS,FAIL] |
+| column            | Type          | length | nullable | Description                                |
+|-------------------|---------------|--------|----------|--------------------------------------------|
+| id                | BIGINT        | -      | false    | PK id                                      |
+| create_time       | DATATIME      | -      | false    | create time                                |
+| update_time       | DATATIME      | -      | true     | update time                                |
+| referral_code_id  | BIGINT        | -      | false    | relative to referral_code                  |
+| member_account_id | VARCHAR       | -      | false    | relative to member_profile                 |
+| referral_type     | VARCHAR       | 10     | false    | reward to, [ENUM:REFERRER,REFEREE]         |
+| reward_type       | VARCHAR       | 10     | false    | reward type, [ENUM:COIN,COUPON]            |
+| reward_amount     | DECIMAL(10,2) | -      | false    | reward amount                              |
+| reward_time       | DATATIME      | -      | false    | reward execution time                      |
+| reward_status     | VARCHAR       | 10     | false    | reward status, [ENUM:PENDING,SUCCESS,FAIL] |
 
 ## 3.2.3 SQL
 
@@ -387,7 +404,7 @@ SELECT
     referral_reward.reward_type,
     referral_reward.reward_amount
 FROM referral_code
-LEFT JOIN member
+LEFT JOIN member_profile member
 ON referral_code.id = member.referral_code_id
 LEFT JOIN referral_reward
 ON referral_code.id = referral_reward.referral_code_id
@@ -415,7 +432,7 @@ SELECT
     member.device_bind_time,
     referral_reward.reward_type,
     referral_reward.reward_amount
-FROM member
+FROM member_profile member
 LEFT JOIN referral_reward
 ON member.referral_code_id = referral_reward.referral_code_id
 WHERE
@@ -426,7 +443,7 @@ WHERE
 ### 3.2.3.6 get referral statistics
 ```
 SELECT
-    member.jkos_id,
+    member.member_jkos_id,
     member.phone_number,
     member.kyc_pass_time,
     member.device_bind_time,
@@ -435,39 +452,43 @@ SELECT
     referral_reward.reward_amount,
     referral_reward.reward_time,
     referral_reward,reward_status
-FROM member
+FROM member_profile member
 LEFT JOIN referral_reward
 ON member.referral_code_id = referral_reward.referral_code_id
 WHERE
     member.referral_code_id = ?referralCodeId
 ```
 
-# 4. Project Management
+## 3.3 Monitor
 
+### 3.3.1 Log and count kafka message per minute in kibana
+
+### 3.3.2 Alert for kafka messages are too many in single topic (100,000/5min)
+
+# 4. Project Management
 
 ## 4.1 Tasks
 
-| Team | service        | Task                                    | Assignee | Estimated time | Start Date |
-|------|----------------|-----------------------------------------|----------|----------------|------------|
-| RD2  | account-module | kyc validation with referral code       |          |                |            |
-| RD2  | account-module | device binding with referral code       |          |                |            |
-| RD2  | account-module | send kafka when using referral code     |          |                |            |
-| RD2  | account-module | send kafka when passes kyc validation   |          |                |            |
-| RD2  | account-module | send kafka when finishes device binding |          |                |            |
-| RD2  | upi            | request subtitle in /myTop              |          |                |            |
-| RD4  | referral-svc   | DB component                            | Randall  | 8h             |            |
-| RD4  | referral-svc   | implement REST clients                  | Randall  | 8h             |            |
-| RD4  | referral-svc   | consumers for Kafka                     | Randall  | 8h             |            |
-| RD4  | referral-svc   | service component for business logic    | Randall  | 8h             |            |
-| RD4  | referral-svc   | implement WEB API                       | Randall  | 8h             |            |
-| RD4  | referral-svc   | implement APP API                       | Randall  | 8h             |            |
-| WEB  | superadmin     | get referral overview                   | Jill     |                |            |
-| WEB  | superadmin     | get referral statistics                 | Jill     |                |            |
-| APP  | -              | kyc validation page                     | Water    |                |            |
-| APP  | -              | device binding page                     | Water    |                |            |
-| APP  | -              | check referral code                     | Water    |                |            |
-| APP  | -              | get referral event detail               | Water    |                |            |
-| APP  | -              | get referral statistics                 | Water    |                |            |
+| Team | service        | Task                                                                   | Assignee | Estimated time                    | Start Date |
+|------|----------------|------------------------------------------------------------------------|----------|-----------------------------------|------------|
+| RD2  | account-module | kyc validation with referral code                                      |          |                                   |            |
+| RD2  | account-module | device binding with referral code                                      |          |                                   |            |
+| RD2  | account-module | send kafka when using referral code                                    |          |                                   |            |
+| RD2  | account-module | send kafka when passes kyc validation (with phone and referral code)   |          |                                   |            |
+| RD2  | account-module | send kafka when finishes device binding (with phone and referral code) |          |                                   |            |
+| RD2  | upi            | request subtitle in /myTop                                             |          |                                   |            |
+| RD4  | referral-svc   | DB component                                                           | Randall  | 8h                                |            |
+| RD4  | referral-svc   | implement REST clients                                                 | Randall  | 8h                                |            |
+| RD4  | referral-svc   | consumers for Kafka                                                    | Randall  | 8h                                |            |
+| RD4  | referral-svc   | service component for business logic                                   | Randall  | 8h                                |            |
+| RD4  | referral-svc   | implement WEB API                                                      | Randall  | 8h                                |            |
+| RD4  | referral-svc   | implement APP API                                                      | Randall  | 8h                                |            |
+| WEB  | micro-admin    | get referral overview                                                  | Jill     | 1w (with get referral statistics) |            |
+| WEB  | micro-admin    | get referral statistics                                                | Jill     | -                                 |            |
+| APP  | -              | kyc validation page + device binding page                              | Water    | 5d                                |            |
+| APP  | -              | referral code main page                                                | Water    | 7d                                |            |
+| APP  | -              | myTop page                                                             | Water    | 2d                                |            |
+| APP  | -              | router                                                                 | Water    | 1d                                |            |
 
 ## 4.2 Dependencies
 
@@ -475,7 +496,7 @@ WHERE
 graph LR
     A[referral-svc] --> B[account-module]
     A[referral-svc] --> C[upi]
-    A[referral-svc] --> D[superadmin]
+    A[referral-svc] --> D[micro-admin]
     B[account-module] --> APP
     C[upi] --> APP
 ```
